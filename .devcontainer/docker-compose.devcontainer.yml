@@ -19,6 +19,9 @@ services:
       - REDIS_URL=redis://redis:6379
       - SHELL=/usr/bin/zsh
     depends_on:
+      backend:
+        condition: service_started
+        restart: true
       postgres:
         condition: service_healthy
       redis:
@@ -28,8 +31,6 @@ services:
 
   # Override backend service for devcontainer compatibility
   backend:
-    profiles:
-      - standalone
     ports:
       - "3001:3001"
 
