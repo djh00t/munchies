@@ -25,7 +25,7 @@ services:
         condition: service_healthy
     command: sleep infinity
     network_mode: service:backend
-    
+
   # Override backend service for devcontainer compatibility
   backend:
     profiles:
