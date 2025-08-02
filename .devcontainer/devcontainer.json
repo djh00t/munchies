@@ -1,37 +1,55 @@
 {
-    "name": "Munchies Development",
-    "build": {
-        "dockerfile": "Dockerfile",
-        "context": ".."
+  "name": "Munchies Development",
+  "dockerComposeFile": ["../docker-compose.yml", "docker-compose.devcontainer.yml"],
+  "service": "devcontainer",
+  "workspaceFolder": "/workspaces/munchies",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "18"
     },
-    "workspaceFolder": "/workspaces/munchies",
-    "features": {
-        "ghcr.io/devcontainers/features/node:1": {
-            "version": "18"
-        },
-        "ghcr.io/devcontainers/features/git:1": {},
-        "ghcr.io/devcontainers/features/common-utils:2": {
-            "installZsh": true,
-            "configureZshAsDefaultShell": true,
-            "installOhMyZsh": true
-        }
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installZsh": true,
+      "configureZshAsDefaultShell": true,
+      "installOhMyZsh": true
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.vscode-typescript-next",
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint",
+        "ms-azuretools.vscode-docker",
+        "eamodio.gitlens",
+        "Prisma.prisma"
+      ],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "zsh",
+        "editor.formatOnSave": true,
+        "typescript.preferences.importModuleSpecifier": "relative"
+      }
+    }
+  },
+  "forwardPorts": [3001, 5432, 6379, 8080, 8081],
+  "portsAttributes": {
+    "3001": {
+      "label": "Backend API",
+      "onAutoForward": "notify"
     },
-    "customizations": {
-        "vscode": {
-            "extensions": [
-                "ms-vscode.vscode-typescript-next",
-                "esbenp.prettier-vscode",
-                "dbaeumer.vscode-eslint",
-                "ms-azuretools.vscode-docker",
-                "eamodio.gitlens"
-            ],
-            "settings": {
-                "terminal.integrated.defaultProfile.linux": "zsh",
-                "editor.formatOnSave": true
-            }
-        }
+    "5432": {
+      "label": "PostgreSQL"
     },
-    "forwardPorts": [3000, 3001],
-    "postCreateCommand": "npm install",
-    "remoteUser": "node"
+    "6379": {
+      "label": "Redis"
+    },
+    "8080": {
+      "label": "Adminer (DB Admin)"
+    },
+    "8081": {
+      "label": "Redis Commander"
+    }
+  },
+  "postCreateCommand": ".devcontainer/test-setup.sh",
+  "remoteUser": "node"
 }
