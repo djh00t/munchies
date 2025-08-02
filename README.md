@@ -4,12 +4,39 @@ A comprehensive meal planning and inventory management application that helps us
 
 ## 🚀 Quick Start
 
+### Option 1: Development Container (Recommended)
+
+The easiest way to get started is using VS Code with Dev Containers:
+
+1. **Prerequisites:**
+   - [VS Code](https://code.visualstudio.com/)
+   - [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
+   - [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+
+2. **Open in Dev Container:**
+   ```bash
+   git clone https://github.com/djh00t/munchies.git
+   cd munchies
+   code .
+   ```
+   - When prompted, click "Reopen in Container"
+   - Or use `Ctrl+Shift+P` → "Dev Containers: Reopen in Container"
+
+3. **Start developing:**
+   ```bash
+   npm run dev
+   ```
+
+> **Note:** The devcontainer automatically sets up the entire development environment including database, dependencies, and VS Code extensions.
+
+### Option 2: Local Development
+
 ### Prerequisites
 - Node.js 18+
 - Docker & Docker Compose
 - Git
 
-### Setup Development Environment
+### Local Setup Development Environment
 
 1. **Clone the repository:**
    ```bash
