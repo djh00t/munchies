@@ -1,0 +1,39 @@
+services:
+  # Development container service
+  devcontainer:
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+    volumes:
+      # Mount the workspace
+      - ..:/workspaces/munchies:cached
+      # Preserve node_modules in named volumes for better performance
+      - node_modules:/workspaces/munchies/node_modules
+      - backend_node_modules:/workspaces/munchies/packages/backend/node_modules
+      - web_node_modules:/workspaces/munchies/packages/web/node_modules
+      # Mount docker socket for Docker-in-Docker
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://munchies:munchies123@postgres:5432/munchies
+      - REDIS_URL=redis://redis:6379
+      - SHELL=/usr/bin/zsh
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: sleep infinity
+    network_mode: service:backend
+    
+  # Override backend service for devcontainer compatibility
+  backend:
+    profiles:
+      - standalone
+    ports:
+      - "3001:3001"
+
+volumes:
+  node_modules:
+  backend_node_modules:
+  web_node_modules:
