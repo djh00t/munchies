@@ -23,9 +23,9 @@
     "docker:reset": "docker-compose down -v && docker-compose up -d"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2",
-    "@types/node": "^20.10.5",
-    "typescript": "^5.3.3"
+    "concurrently": "9.2.0",
+    "@types/node": "24.1.0",
+    "typescript": "5.9.2"
   },
   "engines": {
     "node": ">=18.0.0",
