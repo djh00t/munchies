@@ -1,23 +1,74 @@
 #!/bin/bash
 
-# Test script for devcontainer setup
+# Dev Container Setup Script
+# This runs after the dev container is created
+
 set -e
 
-echo "🧪 Testing Munchies devcontainer setup..."
+echo "🚀 Setting up Munchies dev container environment..."
 
-# Test Node.js
-echo "📦 Testing Node.js..."
-node --version
-npm --version
+# Colors for output
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
 
-# Test TypeScript
-echo "📝 Testing TypeScript..."
-npx tsc --version
+print_status() {
+    echo -e "${BLUE}[INFO]${NC} $1"
+}
 
-# Test database connection
-echo "🗃️ Testing database connection..."
-if command -v psql &> /dev/null; then
-    echo "PostgreSQL client available"
+print_success() {
+    echo -e "${GREEN}[SUCCESS]${NC} $1"
+}
+
+print_warning() {
+    echo -e "${YELLOW}[WARNING]${NC} $1"
+}
+
+# Install dependencies
+print_status "Installing dependencies..."
+npm install
+
+# Create environment files if they don't exist
+print_status "Setting up environment files..."
+if [ ! -f .env ]; then
+    cp .env.example .env
+    print_success "Created .env from .env.example"
+fi
+
+if [ ! -f packages/backend/.env ]; then
+    cp packages/backend/.env.example packages/backend/.env
+    print_success "Created backend .env from .env.example"
+fi
+
+# Create necessary directories
+print_status "Creating directories..."
+mkdir -p uploads
+mkdir -p packages/backend/logs
+
+# Wait for database to be ready
+print_status "Waiting for database to be ready..."
+max_attempts=30
+attempt=1
+while [ $attempt -le $max_attempts ]; do
+    if timeout 5 bash -c 'cat < /dev/null > /dev/tcp/postgres/5432' 2>/dev/null; then
+        print_success "Database port is accessible!"
+        break
+    fi
+    echo "Waiting for database... (attempt $attempt/$max_attempts)"
+    sleep 2
+    attempt=$((attempt + 1))
+done
+
+if [ $attempt -gt $max_attempts ]; then
+    print_warning "Database connection test timed out, but continuing setup..."
+fi
+
+# Generate Prisma client
+print_status "Generating Prisma client..."
+cd packages/backend && npx prisma generate && cd ../..
+
+print_success "Dev container setup complete! 🎉"
     # Test basic connection (will fail if not connected, but that's expected in CI)
     PGPASSWORD=munchies123 psql -h postgres -U munchies -d munchies -c "SELECT 1;" 2>/dev/null || echo "Database not yet available (normal during setup)"
 else
