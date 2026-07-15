@@ -1,6 +1,15 @@
 # Munchies - Task Management
 
-## Project Phases
+## Proj#### Task 1.1.2: Development Environment ✅ COMPLETED
+- [x] Create Docker Compose configuration
+- [x] Set up PostgreSQL database container
+- [x] Set up Redis cache container
+- [x] Configure development scripts
+- [x] Create .env.example files
+- **Assignee**: DevOps Engineer
+- **Estimate**: 1 day
+- **Dependencies**: 1.1.1
+- **Completed**: 2025-08-02s
 
 ### Phase 1: Foundation (Weeks 1-4)
 **Goal**: Set up core infrastructure and basic functionality
@@ -24,15 +33,16 @@
 ### Epic 1.1: Project Setup & Infrastructure
 **Priority**: Critical | **Effort**: 5 days
 
-#### Task 1.1.1: Repository and Monorepo Setup
-- [ ] Initialize GitHub repository `djh00t/munchies`
-- [ ] Set up npm workspaces for monorepo structure
-- [ ] Configure package.json files for all workspaces
-- [ ] Set up shared TypeScript configuration
-- [ ] Create initial folder structure
+#### Task 1.1.1: Repository and Monorepo Setup ✅ COMPLETED
+- [x] Initialize GitHub repository `djh00t/munchies`
+- [x] Set up npm workspaces for monorepo structure
+- [x] Configure package.json files for all workspaces
+- [x] Set up shared TypeScript configuration
+- [x] Create initial folder structure
 - **Assignee**: Backend Developer
 - **Estimate**: 1 day
 - **Dependencies**: None
+- **Completed**: 2025-08-02
 
 #### Task 1.1.2: Development Environment
 - [ ] Create Docker Compose configuration
@@ -44,15 +54,16 @@
 - **Estimate**: 1 day
 - **Dependencies**: 1.1.1
 
-#### Task 1.1.3: Backend API Foundation
-- [ ] Initialize Express.js server with TypeScript
-- [ ] Set up middleware (CORS, body parser, logging)
-- [ ] Configure database connection with Prisma/TypeORM
-- [ ] Set up Redis connection
-- [ ] Create health check endpoints
+#### Task 1.1.3: Backend API Foundation ✅ COMPLETED
+- [x] Initialize Express.js server with TypeScript
+- [x] Set up middleware (CORS, body parser, logging)
+- [x] Configure database connection with Prisma/TypeORM
+- [x] Set up Redis connection
+- [x] Create health check endpoints
 - **Assignee**: Backend Developer
 - **Estimate**: 2 days
 - **Dependencies**: 1.1.2
+- **Completed**: 2025-08-02
 
 #### Task 1.1.4: Database Schema Design
 - [ ] Design and create user tables

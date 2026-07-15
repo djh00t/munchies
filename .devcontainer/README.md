@@ -1,6 +1,187 @@
-# Munchies Development Container
+# Munchies Dev Container
 
-This directory contains the VS Code Development Container configuration for the Munchies project. The devcontainer provides a consistent, isolated development environment with all necessary tools and dependencies pre-installed.
+This development environment uses VS Code Dev Containers with Docker Compose to provide a complete, isolated development setup with all required services.
+
+## What's Included
+
+### Services
+- **Development Container**: Ubuntu with Node.js 18, Zsh, and development tools
+- **PostgreSQL**: Database server with health checks
+- **Redis**: Cache and session storage
+- **Adminer**: Web-based database administration (port 8080)
+- **Redis Commander**: Web-based Redis administration (port 8081)
+
+### Pre-installed Tools
+- Node.js 18 with npm
+- Git with configuration
+- Zsh with Oh My Zsh
+- VS Code extensions for TypeScript, ESLint, Prettier
+- PostgreSQL client tools
+- Redis CLI tools
+
+## Quick Start
+
+### Option 1: VS Code Dev Containers Extension
+1. Install the "Dev Containers" extension in VS Code
+2. Open the project folder
+3. Click "Reopen in Container" when prompted
+4. Wait for the container to build and setup to complete
+
+### Option 2: Command Palette
+1. Open VS Code in the project folder
+2. Press `Cmd/Ctrl + Shift + P`
+3. Type "Dev Containers: Reopen in Container"
+4. Select the command and wait for setup
+
+## What Happens During Setup
+
+The dev container automatically:
+1. **Builds** the development container with all tools
+2. **Starts** PostgreSQL and Redis services
+3. **Installs** npm dependencies
+4. **Creates** environment files from examples
+5. **Generates** Prisma client
+6. **Sets up** directory structure
+
+## After Setup
+
+Once the container is running, you can:
+
+### Start Development
+```bash
+# Run database migrations
+npm run db:migrate
+
+# Seed the database with test data
+npm run db:seed
+
+# Start the backend API server
+npm run dev:backend
+
+# Or start both frontend and backend
+npm run dev
+```
+
+### Access Services
+- **Backend API**: http://localhost:3001
+- **Database Admin**: http://localhost:8080
+- **Redis Admin**: http://localhost:8081
+- **API Health Check**: http://localhost:3001/api/health
+
+### Useful Commands
+```bash
+# Database operations
+npm run db:migrate      # Run migrations
+npm run db:seed         # Seed test data
+npm run db:studio       # Open Prisma Studio
+
+# Development
+npm run dev:backend     # Start backend only
+npm run test            # Run tests
+npm run lint            # Lint code
+
+# View logs
+docker-compose logs postgres
+docker-compose logs redis
+```
+
+## Environment Variables
+
+The setup automatically creates:
+- `.env` (root level configuration)
+- `packages/backend/.env` (backend-specific configuration)
+
+Both files are created from their `.example` counterparts with sensible defaults for the dev container environment.
+
+## Database Connection
+
+The backend connects to PostgreSQL using:
+```
+DATABASE_URL=postgresql://munchies:munchies123@postgres:5432/munchies_dev
+```
+
+The database is accessible from:
+- **Inside containers**: `postgres:5432`
+- **From host**: `localhost:5432` (if ports are forwarded)
+
+## Redis Connection
+
+Redis is accessible at:
+```
+REDIS_URL=redis://redis:6379
+```
+
+## Troubleshooting
+
+### Container Won't Start
+1. Check Docker is running
+2. Try rebuilding: `Cmd/Ctrl + Shift + P` → "Dev Containers: Rebuild Container"
+3. Check Docker Compose logs: `docker-compose logs`
+
+### Database Connection Issues
+1. Wait for services to fully start (can take 30-60 seconds)
+2. Check service health: `docker-compose ps`
+3. Test connection: `docker-compose exec postgres pg_isready -U munchies`
+
+### Port Conflicts
+If ports 3001, 5432, 6379, 8080, or 8081 are in use:
+1. Stop conflicting services
+2. Or modify ports in `.devcontainer/docker-compose.devcontainer.yml`
+
+### Performance Issues
+1. Ensure Docker has adequate resources (4GB+ RAM)
+2. Consider using Docker Desktop with WSL 2 on Windows
+3. Close unnecessary applications
+
+## Development Workflow
+
+### Making Changes
+1. Edit code in VS Code as normal
+2. Changes are automatically synced to the container
+3. Use hot reloading for rapid development
+4. Run tests in the integrated terminal
+
+### Database Changes
+1. Modify `packages/backend/prisma/schema.prisma`
+2. Run `npm run db:migrate` to apply changes
+3. Update seed data if needed
+
+### Adding Dependencies
+```bash
+# Add to root workspace
+npm install <package>
+
+# Add to backend
+npm install <package> --workspace=packages/backend
+
+# Add to frontend
+npm install <package> --workspace=packages/web
+```
+
+## File Persistence
+
+The following are persisted between container restarts:
+- Source code (mounted from host)
+- Database data (named volume)
+- Redis data (named volume)
+- Node modules (named volumes for performance)
+- Uploaded files
+- Log files
+
+## Security Notes
+
+- Default passwords are for development only
+- Environment files contain placeholder secrets
+- Services are isolated within the container network
+- No production data should be used in development
+
+## Contributing
+
+When contributing to the dev container setup:
+1. Test changes thoroughly
+2. Update this README
+3. Ensure compatibility across platforms
+4. Document any new services or tools The devcontainer provides a consistent, isolated development environment with all necessary tools and dependencies pre-installed.
 
 ## 🚀 Quick Start
 

@@ -2,39 +2,69 @@ services:
   # Development container service
   devcontainer:
     build:
-      context: .
+      context: ..
       dockerfile: .devcontainer/Dockerfile
     volumes:
       # Mount the workspace
-      - .:/workspaces/munchies:cached
+      - ..:/workspaces/munchies:cached
       # Preserve node_modules in named volumes for better performance
-      - node_modules:/workspaces/munchies/node_modules
-      - backend_node_modules:/workspaces/munchies/packages/backend/node_modules
-      - web_node_modules:/workspaces/munchies/packages/web/node_modules
-      # Mount docker socket for Docker-in-Docker
-      - /var/run/docker.sock:/var/run/docker.sock
+      - devcontainer_node_modules:/workspaces/munchies/node_modules
+      - devcontainer_backend_node_modules:/workspaces/munchies/packages/backend/node_modules
+      - devcontainer_web_node_modules:/workspaces/munchies/packages/web/node_modules
+      # Mount uploads and logs
+      - ../uploads:/workspaces/munchies/uploads
+      - ../packages/backend/logs:/workspaces/munchies/packages/backend/logs
     environment:
       - NODE_ENV=development
       - DATABASE_URL=postgresql://munchies:munchies123@postgres:5432/munchies
       - REDIS_URL=redis://redis:6379
-      - SHELL=/usr/bin/zsh
+      - SHELL=/bin/zsh
     depends_on:
-      backend:
-        condition: service_started
-        restart: true
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
     command: sleep infinity
-    network_mode: service:backend
+    networks:
+      - munchies-dev
 
-  # Override backend service for devcontainer compatibility
+  # Override database for dev container environment
+  postgres:
+    environment:
+      - POSTGRES_DB=munchies_dev
+      - POSTGRES_USER=munchies
+      - POSTGRES_PASSWORD=munchies123
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    networks:
+      - munchies-dev
+
+  # Override redis for dev container environment  
+  redis:
+    networks:
+      - munchies-dev
+
+  # Override backend for port exposure
   backend:
-    ports:
-      - "3001:3001"
+    networks:
+      - munchies-dev
+
+  # Override adminer for dev container
+  adminer:
+    networks:
+      - munchies-dev
+
+  # Override redis-commander for dev container
+  redis-commander:
+    networks:
+      - munchies-dev
 
 volumes:
-  node_modules:
-  backend_node_modules:
-  web_node_modules:
+  devcontainer_node_modules:
+  devcontainer_backend_node_modules:
+  devcontainer_web_node_modules:
+  postgres_dev_data:
+
+networks:
+  munchies-dev:
+    driver: bridge

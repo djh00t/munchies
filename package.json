@@ -18,14 +18,23 @@
     "clean": "rm -rf packages/*/dist packages/*/build packages/*/.next packages/*/node_modules node_modules",
     "db:migrate": "npm run db:migrate --workspace=packages/backend",
     "db:seed": "npm run db:seed --workspace=packages/backend",
-    "docker:up": "docker-compose up -d",
-    "docker:down": "docker-compose down",
-    "docker:reset": "docker-compose down -v && docker-compose up -d"
+    "docker:up": "echo 'Docker not available in dev container. Use npm run services:start instead.'",
+    "docker:down": "echo 'Docker not available in dev container. Use npm run services:stop instead.'",
+    "docker:reset": "echo 'Docker not available in dev container. Use npm run services:stop && npm run services:start instead.'",
+    "services:start": "./scripts/start-services.sh",
+    "services:stop": "./scripts/stop-services.sh",
+    "services:status": "./scripts/health-check.sh",
+    "setup:dev": "./scripts/setup-dev.sh",
+    "health:check": "./scripts/health-check.sh",
+    "logs": "docker-compose logs -f",
+    "logs:backend": "docker-compose logs -f backend",
+    "logs:db": "docker-compose logs -f postgres",
+    "logs:redis": "docker-compose logs -f redis"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2",
-    "@types/node": "^20.10.5",
-    "typescript": "^5.3.3"
+    "concurrently": "9.2.0",
+    "@types/node": "24.1.0",
+    "typescript": "5.9.2"
   },
   "engines": {
     "node": ">=18.0.0",

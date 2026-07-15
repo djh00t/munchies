@@ -1,0 +1,345 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User management
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  avatar    String?
+  provider  String   // 'google', 'apple', 'email'
+  providerId String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  preferences UserPreferences?
+  inventories InventoryItem[]
+  mealPlans   MealPlan[]
+  favorites   UserRecipeFavorite[]
+  shoppingLists ShoppingList[]
+  chatSessions ChatSession[]
+  subscriptions Subscription[]
+
+  @@map("users")
+}
+
+model UserPreferences {
+  id       String @id @default(cuid())
+  userId   String @unique
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Dietary preferences
+  dietaryRestrictions String[] // ['vegetarian', 'vegan', 'gluten-free', 'dairy-free', etc.]
+  allergies          String[]
+  cuisinePreferences String[]
+  
+  // Cooking preferences
+  cookingSkillLevel  String   @default("beginner") // 'beginner', 'intermediate', 'advanced'
+  maxCookingTime     Int      @default(60) // minutes
+  servingSize        Int      @default(4)
+  
+  // Meal planning
+  mealPlanFrequency  String   @default("weekly") // 'daily', 'weekly', 'monthly'
+  budgetConstraint   Float?
+  
+  // Notification preferences
+  expirationAlerts   Boolean  @default(true)
+  mealPlanReminders  Boolean  @default(true)
+  shoppingReminders  Boolean  @default(true)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("user_preferences")
+}
+
+// Inventory management
+model InventoryItem {
+  id       String @id @default(cuid())
+  userId   String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name        String
+  category    String
+  quantity    Float
+  unit        String
+  brand       String?
+  location    String? // 'fridge', 'pantry', 'freezer'
+  
+  // Dates
+  purchaseDate  DateTime?
+  expirationDate DateTime?
+  
+  // OCR and image data
+  originalImage String? // URL to uploaded image
+  ocrText      String? // Raw OCR text
+  confidence   Float?  // OCR confidence score
+  
+  // Usage tracking
+  lastUsed     DateTime?
+  usageCount   Int      @default(0)
+  
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relationships
+  usedInMeals MealPlanRecipe[]
+
+  @@map("inventory_items")
+}
+
+// Recipe management
+model Recipe {
+  id          String @id @default(cuid())
+  
+  // Basic info
+  title       String
+  description String?
+  imageUrl    String?
+  sourceUrl   String?
+  source      String // 'spoonacular', 'user', 'admin'
+  
+  // Recipe details
+  servings    Int
+  prepTime    Int // minutes
+  cookTime    Int // minutes
+  totalTime   Int // minutes
+  difficulty  String @default("medium") // 'easy', 'medium', 'hard'
+  
+  // Nutritional info
+  calories    Int?
+  protein     Float?
+  carbs       Float?
+  fat         Float?
+  fiber       Float?
+  sugar       Float?
+  
+  // External IDs
+  spoonacularId Int?
+  
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relationships
+  ingredients RecipeIngredient[]
+  instructions RecipeInstruction[]
+  categories  RecipeCategory[]
+  tags        RecipeTag[]
+  favorites   UserRecipeFavorite[]
+  mealPlans   MealPlanRecipe[]
+
+  @@map("recipes")
+}
+
+model RecipeIngredient {
+  id       String @id @default(cuid())
+  recipeId String
+  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  name     String
+  amount   Float?
+  unit     String?
+  notes    String?
+  order    Int
+
+  @@map("recipe_ingredients")
+}
+
+model RecipeInstruction {
+  id       String @id @default(cuid())
+  recipeId String
+  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  step     Int
+  text     String
+  imageUrl String?
+
+  @@map("recipe_instructions")
+}
+
+model RecipeCategory {
+  id       String @id @default(cuid())
+  recipeId String
+  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  category String
+
+  @@unique([recipeId, category])
+  @@map("recipe_categories")
+}
+
+model RecipeTag {
+  id       String @id @default(cuid())
+  recipeId String
+  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  tag String
+
+  @@unique([recipeId, tag])
+  @@map("recipe_tags")
+}
+
+model UserRecipeFavorite {
+  id       String @id @default(cuid())
+  userId   String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipeId String
+  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, recipeId])
+  @@map("user_recipe_favorites")
+}
+
+// Meal planning
+model MealPlan {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name        String
+  startDate   DateTime
+  endDate     DateTime
+  isActive    Boolean  @default(true)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relationships
+  meals MealPlanRecipe[]
+
+  @@map("meal_plans")
+}
+
+model MealPlanRecipe {
+  id         String @id @default(cuid())
+  mealPlanId String
+  mealPlan   MealPlan @relation(fields: [mealPlanId], references: [id], onDelete: Cascade)
+  recipeId   String
+  recipe     Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  // Meal details
+  mealType   String   // 'breakfast', 'lunch', 'dinner', 'snack'
+  mealDate   DateTime
+  servings   Int      @default(1)
+  
+  // Inventory usage
+  inventoryItems InventoryItem[]
+  
+  isCompleted Boolean @default(false)
+  notes       String?
+
+  @@map("meal_plan_recipes")
+}
+
+// Shopping lists
+model ShoppingList {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name        String
+  isCompleted Boolean  @default(false)
+  isShared    Boolean  @default(false)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relationships
+  items ShoppingListItem[]
+
+  @@map("shopping_lists")
+}
+
+model ShoppingListItem {
+  id             String       @id @default(cuid())
+  shoppingListId String
+  shoppingList   ShoppingList @relation(fields: [shoppingListId], references: [id], onDelete: Cascade)
+
+  name        String
+  category    String?
+  quantity    Float?
+  unit        String?
+  notes       String?
+  isPurchased Boolean @default(false)
+  order       Int
+
+  @@map("shopping_list_items")
+}
+
+// AI Chat system
+model ChatSession {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  title     String
+  isActive  Boolean  @default(true)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  messages ChatMessage[]
+
+  @@map("chat_sessions")
+}
+
+model ChatMessage {
+  id            String      @id @default(cuid())
+  chatSessionId String
+  chatSession   ChatSession @relation(fields: [chatSessionId], references: [id], onDelete: Cascade)
+
+  role      String // 'user', 'assistant', 'system'
+  content   String
+  metadata  Json? // For storing additional context
+  
+  createdAt DateTime @default(now())
+
+  @@map("chat_messages")
+}
+
+// Subscription and billing
+model Subscription {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  plan           String   // 'free', 'premium', 'family'
+  status         String   // 'active', 'canceled', 'past_due', 'trialing'
+  stripeId       String?  @unique
+  currentPeriodStart DateTime?
+  currentPeriodEnd   DateTime?
+  cancelAtPeriodEnd  Boolean @default(false)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("subscriptions")
+}
+
+// System models
+model SystemSettings {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("system_settings")
+}
